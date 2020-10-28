@@ -15,8 +15,19 @@ const tweetValidators = [
 const handleValidationErrors = (req, res, next) => {
     const validationErrors = validationResult(req);
     // TODO: Generate error object and invoke next middleware function
-    
+    const errors = validationErrors.array().map((error) => error.msg)
 
+    if(!validationErrors.isEmpty()) {
+        const err = Error("Bad request.");
+    
+        err.errors = errors;
+        err.status = 400;
+        err.title = "Bad request.";
+        return next(err)
+
+    }
+
+    next();
 };
 
 const asyncHandler = (handler) => (req, res, next) => {
@@ -49,13 +60,52 @@ router.get("/:id(\\d+)", asyncHandler( async (req, res, next) => {
 )
 
 
-router.post("/", )
+router.post("/", tweetValidators, handleValidationErrors, asyncHandler(async (req, res) => {
+    const { message } = req.body
+
+    const newTweet = await Tweet.build()
+
+    newTweet.message = message;
+
+    await newTweet.save();
+
+    res.redirect("/")
+}))
+
+router.put("/:id(\\d+)", tweetValidators, handleValidationErrors, asyncHandler(async (req, res, next) => {
+    const tweetId = parseInt(req.params.id, 10)
+
+    const { message } = req.body
+
+    const tweet = await Tweet.findByPk(tweetId)
+
+    if (tweet) {
+
+        tweet.message = message;
+
+        await tweet.save();
+
+        res.redirect("/")
+    } else {
+        next(tweetNotFoundError(tweetId))
+    }
 
 
+}))
 
+router.delete("/:id(\\d+)", asyncHandler(async (req, res, next) => {
+    const tweetId = parseInt(req.params.id, 10)
 
+    const tweet = await Tweet.findByPk(tweetId)
+    console.log(tweet)
+    if (tweet) {
+        await tweet.destroy()
 
-
+        res.redirect("/")
+    } else {
+        next(tweetNotFoundError(tweetId))
+    }
+}))
 
 
 module.exports = router 
