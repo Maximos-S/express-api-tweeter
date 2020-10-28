@@ -2,7 +2,11 @@ const express = require("express");
 const morgan = require("morgan");
 const { environment } = require('./config');
 const app = express();
-
+const indexRouter = require("./routes/index");
+const tweetsRouter = require("./routes/tweets");
+app.use(express.json())
+app.use("/", indexRouter)
+app.use("/tweets", tweetsRouter)
 app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
