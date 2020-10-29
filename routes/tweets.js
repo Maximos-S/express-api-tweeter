@@ -6,6 +6,7 @@ const router = express.Router()
 const { check } = require("express-validator");
 const { asyncHandler, handleValidationErrors} = require("../utils");
 const { requireAuth } = require("../auth");
+const user = require('../db/models/user');
 
 router.use(requireAuth);
 
@@ -31,7 +32,11 @@ const tweetNotFoundError = (tweetId) => {
 
 
 router.get("/", asyncHandler( async (req, res) => {
-   const tweets =  await Tweet.findAll({})
+   const tweets =  await Tweet.findAll({
+       include: [{ model: User, as: "user", attributes: ['username']}],
+       order: [["createdAt", "DESC"]],
+       attributes: ["message"],
+   });
     res.json({tweets})
 }),
 )
@@ -47,13 +52,10 @@ router.get("/:id(\\d+)", asyncHandler( async (req, res, next) => {
 
 router.post("/", tweetValidators, handleValidationErrors, asyncHandler(async (req, res) => {
     const { message } = req.body
-
-    const newTweet = await Tweet.build()
-
-    newTweet.message = message;
-
-    await newTweet.save();
-
+    const tweet = await Tweet.create({
+        message,
+        userId: req.user.id
+    });
     res.redirect("/")
 }))
 

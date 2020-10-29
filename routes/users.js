@@ -5,7 +5,8 @@ const router = express.Router()
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const { getUserToken } = require("../auth.js");
-const  {User}  = require("../db/models")
+const  {User, Tweet}  = require("../db/models")
+const { requireAuth } = require("../auth")
 
 
 const validateUsername =
@@ -43,6 +44,25 @@ router.post("/", validateUsername, validateEmailAndPassword, asyncHandler(async 
     //to generate json
         
 }))
+
+
+router.get("/users/:id/tweets", requireAuth, asyncHandler(async (req, res) => {
+  const userId = parseInt(req.params.id)
+  const tweets = await Tweet.findAll({ 
+    where: { userId }
+  })
+  res.json({tweets})
+})
+)
+
+
+
+
+
+
+
+
+
 
 router.post("/token", validateEmailAndPassword, asyncHandler(async (req, res, next) => {
   const { email, password} = req.body;
