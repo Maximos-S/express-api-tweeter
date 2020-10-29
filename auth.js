@@ -60,6 +60,8 @@ const getUserToken = (user) => {
         email: user.email,
     }
 
+    console.log("hey")
+
     const token = jwt.sign({
             data: userDataForToken
         },
