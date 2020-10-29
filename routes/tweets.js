@@ -5,6 +5,10 @@ const { Tweet } = db;
 const router = express.Router()
 const { check } = require("express-validator");
 const { asyncHandler, handleValidationErrors} = require("../utils");
+const { requireAuth } = require("../auth");
+
+router.use(requireAuth);
+
 const tweetValidators = [
     check("message")
     .exists({checkFalsy : true})

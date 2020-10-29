@@ -1,3 +1,5 @@
+const { validationResult } = require("express-validator")
+
 const handleValidationErrors = (req, res, next) => {
     const validationErrors = validationResult(req);
     // TODO: Generate error object and invoke next middleware function
